@@ -1,11 +1,24 @@
 # Ahmadul Karim Chowdhury
 
-Data Analyst | Data Engineer | Visualization Expert
+**Data Analyst | Data Engineer | Visualization Expert**
 
-Live site: https://akc23.github.io
+Top Rated freelance data analyst based in Dhaka, Bangladesh. I build dashboards, data pipelines and predictive models that turn messy data into numbers leaders can act on.
 
-One page portfolio covering experience, selected projects, research, certifications and client reviews.
+**Live site:** https://akc23.github.io
+
+## What is on the site
+
+- Experience, client reviews and skills
+- Selected projects in Power BI, Tableau, Looker Studio and Python
+- Education and certifications
+- Published research
 
 ## Contact
 
-ahmadulkc@gmail.com | https://linkedin.com/in/ahmadulkc | https://github.com/AKC23 | https://www.upwork.com/freelancers/~014330e592a3028571
+A. **Email:** [ahmadulkc@gmail.com](mailto:ahmadulkc@gmail.com)  
+B. **LinkedIn:** https://www.linkedin.com/in/ahmadulkc/  
+C. **Upwork:** https://www.upwork.com/freelancers/~014330e592a3028571  
+D. **GitHub:** https://github.com/AKC23  
+E. **Kaggle:** https://www.kaggle.com/ahmadulkc  
+F. **ResearchGate:** https://www.researchgate.net/profile/Ahmadul-Chowdhury  
+G. **YouTube:** https://www.youtube.com/channel/UCsrAIm1TuOTUx92EJ3WGZ6A
