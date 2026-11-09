@@ -152,6 +152,19 @@
     update();
   }
 
+  // ---- Featured project video ----
+  var play = document.querySelector(".play-btn");
+  if (play) {
+    var media = play.closest(".featured-media");
+    var vid = media.querySelector(".demo-video");
+    play.addEventListener("click", function () {
+      media.querySelector(".featured-img").hidden = true;
+      play.hidden = true;
+      vid.hidden = false;
+      vid.play().catch(function () {});
+    });
+  }
+
   // ---- Project image switchers ----
   document.querySelectorAll(".card-media.multi").forEach(function (box) {
     var slides = box.querySelectorAll(".m-slide");
