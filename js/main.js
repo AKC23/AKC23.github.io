@@ -80,6 +80,23 @@
     reveals.forEach(function (el) { io.observe(el); });
   }
 
+  // ---- Review lightbox ----
+  var dlg = document.getElementById("lightbox");
+  if (dlg && typeof dlg.showModal === "function") {
+    var big = document.getElementById("lightbox-img");
+    var cap = document.getElementById("lightbox-cap");
+    document.querySelectorAll(".review-btn").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var im = b.querySelector("img");
+        big.src = b.getAttribute("data-full");
+        big.alt = im ? im.alt : "";
+        cap.textContent = b.getAttribute("data-title") || "";
+        dlg.showModal();
+      });
+    });
+    dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+  }
+
   // ---- Footer year ----
   var y = document.getElementById("year");
   if (y) y.textContent = new Date().getFullYear();
