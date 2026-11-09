@@ -80,57 +80,89 @@
     reveals.forEach(function (el) { io.observe(el); });
   }
 
-  // ---- Reviews carousel ----
+  // ---- Reviews carousel (infinite loop) ----
   var car = document.getElementById("reviews");
   if (car) {
     var track = car.querySelector(".car-track");
-    var slides = track.querySelectorAll(".slide");
-    var prev = car.querySelector(".prev");
-    var next = car.querySelector(".next");
+    var originals = Array.prototype.slice.call(track.querySelectorAll(".slide"));
+    var n = originals.length;
     var dotsBox = document.getElementById("reviews-dots");
     var dots = [];
+    var clone = function (el) {
+      var c = el.cloneNode(true);
+      c.setAttribute("aria-hidden", "true");
+      c.classList.add("is-clone");
+      c.querySelectorAll("button").forEach(function (b) { b.tabIndex = -1; });
+      return c;
+    };
+    var before = document.createDocumentFragment();
+    var after = document.createDocumentFragment();
+    originals.forEach(function (el) { before.appendChild(clone(el)); after.appendChild(clone(el)); });
+    track.insertBefore(before, track.firstChild);
+    track.appendChild(after);
+
     var step = function () {
       var gap = parseFloat(getComputedStyle(track).columnGap) || 18;
-      return slides[0].getBoundingClientRect().width + gap;
+      return originals[0].getBoundingClientRect().width + gap;
     };
-    var perView = function () { return Math.max(1, Math.round((track.clientWidth + 18) / step())); };
-    var buildDots = function () {
-      dotsBox.innerHTML = ""; dots = [];
-      var n = Math.max(1, slides.length - perView() + 1);
-      for (var i = 0; i < n; i++) {
-        (function (i) {
-          var d = document.createElement("button");
-          d.type = "button"; d.setAttribute("aria-label", "Go to review " + (i + 1));
-          d.addEventListener("click", function () { track.scrollTo({ left: i * step() }); });
-          dotsBox.appendChild(d); dots.push(d);
-        })(i);
-      }
+    var jump = function (left) {
+      track.style.scrollBehavior = "auto";
+      track.style.scrollSnapType = "none";
+      track.scrollLeft = left;
+      void track.offsetWidth;
+      track.style.scrollSnapType = "";
+      track.style.scrollBehavior = "";
+    };
+    var current = function () { return Math.round(track.scrollLeft / step()); };
+    var recenter = function () {
+      var i = current();
+      if (i < n) jump((i + n) * step());
+      else if (i >= 2 * n) jump((i - n) * step());
     };
     var update = function () {
-      var max = track.scrollWidth - track.clientWidth - 2;
-      var idx = Math.min(dots.length - 1, Math.round(track.scrollLeft / step()));
-      if (track.scrollLeft >= max) idx = dots.length - 1;
+      var idx = ((current() % n) + n) % n;
       dots.forEach(function (d, i) { d.setAttribute("aria-current", i === idx ? "true" : "false"); });
-      prev.disabled = track.scrollLeft <= 2;
-      next.disabled = track.scrollLeft >= max;
     };
-    var move = function (dir) {
-      var max = track.scrollWidth - track.clientWidth;
-      var target = track.scrollLeft + dir * step() * perView();
-      if (dir > 0 && track.scrollLeft >= max - 2) target = 0;
-      track.scrollTo({ left: Math.max(0, Math.min(max, target)) });
-    };
-    prev.addEventListener("click", function () { move(-1); });
-    next.addEventListener("click", function () { move(1); });
+    for (var i = 0; i < n; i++) {
+      (function (i) {
+        var d = document.createElement("button");
+        d.type = "button"; d.setAttribute("aria-label", "Go to review " + (i + 1));
+        d.addEventListener("click", function () {
+          var base = Math.floor(current() / n) * n;
+          track.scrollTo({ left: (base + i) * step() });
+        });
+        dotsBox.appendChild(d); dots.push(d);
+      })(i);
+    }
+    var go = function (dir) { track.scrollTo({ left: (current() + dir) * step() }); };
+    car.querySelector(".prev").addEventListener("click", function () { go(-1); });
+    car.querySelector(".next").addEventListener("click", function () { go(1); });
     track.addEventListener("keydown", function (e) {
-      if (e.key === "ArrowRight") { e.preventDefault(); move(1); }
-      if (e.key === "ArrowLeft") { e.preventDefault(); move(-1); }
+      if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
     });
-    var tick;
-    track.addEventListener("scroll", function () { cancelAnimationFrame(tick); tick = requestAnimationFrame(update); }, { passive: true });
-    window.addEventListener("resize", function () { buildDots(); update(); });
-    buildDots(); update();
+    var settle;
+    track.addEventListener("scroll", function () {
+      update();
+      clearTimeout(settle);
+      settle = setTimeout(recenter, 140);
+    }, { passive: true });
+    window.addEventListener("resize", function () { jump((current() % n + n) * step()); update(); });
+    jump(n * step());
+    update();
   }
+
+  // ---- Project image switchers ----
+  document.querySelectorAll(".card-media.multi").forEach(function (box) {
+    var slides = box.querySelectorAll(".m-slide");
+    var btns = box.querySelectorAll(".m-dots button");
+    btns.forEach(function (b, i) {
+      b.addEventListener("click", function () {
+        slides.forEach(function (sl, j) { sl.classList.toggle("on", j === i); sl.tabIndex = j === i ? 0 : -1; });
+        btns.forEach(function (x, j) { x.setAttribute("aria-current", j === i ? "true" : "false"); });
+      });
+    });
+  });
 
   // ---- Review lightbox ----
   var dlg = document.getElementById("lightbox");
