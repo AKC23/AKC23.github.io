@@ -80,6 +80,58 @@
     reveals.forEach(function (el) { io.observe(el); });
   }
 
+  // ---- Reviews carousel ----
+  var car = document.getElementById("reviews");
+  if (car) {
+    var track = car.querySelector(".car-track");
+    var slides = track.querySelectorAll(".slide");
+    var prev = car.querySelector(".prev");
+    var next = car.querySelector(".next");
+    var dotsBox = document.getElementById("reviews-dots");
+    var dots = [];
+    var step = function () {
+      var gap = parseFloat(getComputedStyle(track).columnGap) || 18;
+      return slides[0].getBoundingClientRect().width + gap;
+    };
+    var perView = function () { return Math.max(1, Math.round((track.clientWidth + 18) / step())); };
+    var buildDots = function () {
+      dotsBox.innerHTML = ""; dots = [];
+      var n = Math.max(1, slides.length - perView() + 1);
+      for (var i = 0; i < n; i++) {
+        (function (i) {
+          var d = document.createElement("button");
+          d.type = "button"; d.setAttribute("aria-label", "Go to review " + (i + 1));
+          d.addEventListener("click", function () { track.scrollTo({ left: i * step() }); });
+          dotsBox.appendChild(d); dots.push(d);
+        })(i);
+      }
+    };
+    var update = function () {
+      var max = track.scrollWidth - track.clientWidth - 2;
+      var idx = Math.min(dots.length - 1, Math.round(track.scrollLeft / step()));
+      if (track.scrollLeft >= max) idx = dots.length - 1;
+      dots.forEach(function (d, i) { d.setAttribute("aria-current", i === idx ? "true" : "false"); });
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max;
+    };
+    var move = function (dir) {
+      var max = track.scrollWidth - track.clientWidth;
+      var target = track.scrollLeft + dir * step() * perView();
+      if (dir > 0 && track.scrollLeft >= max - 2) target = 0;
+      track.scrollTo({ left: Math.max(0, Math.min(max, target)) });
+    };
+    prev.addEventListener("click", function () { move(-1); });
+    next.addEventListener("click", function () { move(1); });
+    track.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight") { e.preventDefault(); move(1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); move(-1); }
+    });
+    var tick;
+    track.addEventListener("scroll", function () { cancelAnimationFrame(tick); tick = requestAnimationFrame(update); }, { passive: true });
+    window.addEventListener("resize", function () { buildDots(); update(); });
+    buildDots(); update();
+  }
+
   // ---- Review lightbox ----
   var dlg = document.getElementById("lightbox");
   if (dlg && typeof dlg.showModal === "function") {
