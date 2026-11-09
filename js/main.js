@@ -157,12 +157,16 @@
   if (play) {
     var media = play.closest(".featured-media");
     var vid = media.querySelector(".demo-video");
-    play.addEventListener("click", function () {
-      media.querySelector(".featured-img").hidden = true;
+    var still = media.querySelector(".featured-img");
+    var start = function () {
+      still.hidden = true;
       play.hidden = true;
       vid.hidden = false;
+      var r = media.getBoundingClientRect();
+      if (r.top < 0 || r.bottom > window.innerHeight) media.scrollIntoView({ behavior: "smooth", block: "center" });
       vid.play().catch(function () {});
-    });
+    };
+    document.querySelectorAll("[data-play]").forEach(function (b) { b.addEventListener("click", start); });
   }
 
   // ---- Project image switchers ----
